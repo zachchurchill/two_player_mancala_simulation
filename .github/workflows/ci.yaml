@@ -1,0 +1,19 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SHA: ${{ github.sha }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build CI image
+      run: docker-compose -f docker-compose.ci.yaml build ci-image
+    - name: Linting
+      run: docker-compose -f docker-compose.ci.yaml run lint
+    - name: Type Checking
+      run: docker-compose -f docker-compose.ci.yaml run type-check
+    - name: Testing
+      run: docker-compose -f docker-compose.ci.yaml run test

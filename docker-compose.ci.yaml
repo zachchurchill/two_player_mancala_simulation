@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  ci-image:
+    build:
+      context: .
+      dockerfile: ci.Dockerfile
+    image: "ci-image:${SHA}"
+  lint:
+    image: "ci-image:${SHA}"
+    command: black --check --diff mancala
+  type-check:
+    image: "ci-image:${SHA}"
+    command: mypy mancala
+  test:
+    image: "ci-image:${SHA}"
+    command: pytest --cov mancala
