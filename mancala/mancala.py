@@ -85,6 +85,7 @@ def get_new_board() -> Dict[Player, PlayerRow]:
 
 def take_turn(board: Dict[Player, PlayerRow], turn: Turn) -> Dict[Player, PlayerRow]:
     new_board = copy.deepcopy(board)
+    opponent = Player.ONE if turn.player == Player.TWO else Player.TWO
 
     # 'Pick up' the pieces
     pieces = new_board[turn.player].bins[turn.selected_bin]
@@ -99,6 +100,12 @@ def take_turn(board: Dict[Player, PlayerRow], turn: Turn) -> Dict[Player, Player
 
     # If there are no pieces, then stop; otherwise, add 1 piece to the goal
     if pieces == 0:
+        last_piece_landed_in = list(bin_indexes_to_increment)[0]
+        if new_board[turn.player].bins[last_piece_landed_in] == 1:
+            new_board[turn.player].bins[last_piece_landed_in] -= 1
+            stolen_pieces = new_board[opponent].bins[last_piece_landed_in]
+            new_board[opponent].bins[last_piece_landed_in] -= stolen_pieces
+            new_board[turn.player].add_pieces_to_goal(stolen_pieces + 1)
         return new_board
     new_board[turn.player].add_pieces_to_goal(1)
     pieces -= 1
@@ -107,7 +114,6 @@ def take_turn(board: Dict[Player, PlayerRow], turn: Turn) -> Dict[Player, Player
     if pieces == 0:
         return new_board
 
-    opponent = Player.ONE if turn.player == Player.TWO else Player.TWO
     last_bin_index = len(new_board[opponent].bins) - 1
     bin_indexes_to_increment = range(
         last_bin_index, max(-1, last_bin_index - pieces), -1
@@ -129,6 +135,12 @@ def take_turn(board: Dict[Player, PlayerRow], turn: Turn) -> Dict[Player, Player
         new_board[turn.player].add_piece_in_bin(bin_index)
 
     if pieces == 0:
+        last_piece_landed_in = list(bin_indexes_to_increment)[-1]
+        if new_board[turn.player].bins[last_piece_landed_in] == 1:
+            new_board[turn.player].bins[last_piece_landed_in] -= 1
+            stolen_pieces = new_board[opponent].bins[last_piece_landed_in]
+            new_board[opponent].bins[last_piece_landed_in] -= stolen_pieces
+            new_board[turn.player].add_pieces_to_goal(stolen_pieces + 1)
         return new_board
     new_board[turn.player].add_pieces_to_goal(1)
     pieces -= 1

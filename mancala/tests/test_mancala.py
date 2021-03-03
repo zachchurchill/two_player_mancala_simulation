@@ -210,3 +210,30 @@ def test_double_wrap_turn_that_ends_in_goal(player, opponent):
 
     assert new_board[player] == PlayerRow(bins=[1, 1, 1, 1, 3, 1], goal=12)
     assert new_board[opponent] == PlayerRow(bins=[2, 7, 5, 1, 2, 8], goal=3)
+
+
+@pytest.mark.parametrize(
+    "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
+)
+def test_last_piece_in_empty_bin_steals_opponents_pieces(player, opponent):
+    """
+    The idea here is that if a player takes a turn that results
+    in their last piece landing in a previously empty bin on their side,
+    then the player gets to steal the pieces in the same bin on their
+    opponents side. Both the last piece that landed in the previously empty
+    bin and their opponents pieces go into the player's goal.
+    """
+    board = {
+        player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
+        opponent: PlayerRow(bins=[1, 6, 7, 1, 2, 7], goal=3),
+    }
+
+    # In-player row scenario
+    in_player_row_board = take_turn(board, Turn(player, 5))
+    assert in_player_row_board[player] == PlayerRow(bins=[0, 10, 0, 0, 1, 0], goal=14)
+    assert in_player_row_board[opponent] == PlayerRow(bins=[1, 6, 7, 0, 2, 7], goal=3)
+
+    # Double-wrap scenario
+    double_wrap_board = take_turn(board, Turn(player, 1))
+    assert double_wrap_board[player] == PlayerRow(bins=[1, 0, 0, 0, 0, 3], goal=17)
+    assert double_wrap_board[opponent] == PlayerRow(bins=[2, 7, 8, 2, 0, 8], goal=3)
