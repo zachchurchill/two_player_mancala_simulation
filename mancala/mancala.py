@@ -80,3 +80,55 @@ def get_new_board() -> Dict[Player, PlayerRow]:
         Player.ONE: PlayerRow.get_new_player_row(),
         Player.TWO: PlayerRow.get_new_player_row(),
     }
+
+
+def take_turn(board: Dict[Player, PlayerRow], turn: Turn) -> None:
+    # 'Pick up' the pieces
+    pieces = board[turn.player].bins[turn.selected_bin]
+    board[turn.player].bins[turn.selected_bin] -= pieces
+
+    bin_indexes_to_increment = range(
+        max(0, turn.selected_bin - pieces), turn.selected_bin
+    )
+    pieces -= len(bin_indexes_to_increment)
+    for bin_index in bin_indexes_to_increment:
+        board[turn.player].add_piece_in_bin(bin_index)
+
+    # If there are no pieces, then stop; otherwise, add 1 piece to the goal
+    if pieces == 0:
+        return
+    board[turn.player].add_pieces_to_goal(1)
+    pieces -= 1
+
+    # If there are no pieces, then stop; otherwise, continue to opponent's row
+    if pieces == 0:
+        return
+
+    opponent = Player.ONE if turn.player == Player.TWO else Player.TWO
+    last_bin_index = len(board[opponent].bins) - 1
+    bin_indexes_to_increment = range(
+        last_bin_index, max(-1, last_bin_index - pieces), -1
+    )
+    pieces -= len(bin_indexes_to_increment)
+    for bin_index in bin_indexes_to_increment:
+        board[opponent].add_piece_in_bin(bin_index)
+
+    # Potentially reach back around to the player's row, but this time
+    # we're starting at the bin furthest from the goal
+    if pieces == 0:
+        return
+    last_bin_index = len(board[turn.player].bins) - 1
+    bin_indexes_to_increment = range(
+        last_bin_index, max(-1, last_bin_index - pieces), -1
+    )
+    pieces -= len(bin_indexes_to_increment)
+    for bin_index in bin_indexes_to_increment:
+        board[turn.player].add_piece_in_bin(bin_index)
+
+    if pieces == 0:
+        return
+    board[turn.player].add_pieces_to_goal(1)
+    pieces -= 1
+
+    # This will help catch rare cases when it wraps back to the opponents row
+    assert pieces == 0

@@ -1,7 +1,7 @@
 import pytest
 
 from mancala.config import NUMBER_OF_BINS, NUMBER_OF_STARTING_PIECES
-from mancala.mancala import Player, PlayerRow, Turn, get_new_board
+from mancala.mancala import Player, PlayerRow, Turn, get_new_board, take_turn
 
 
 @pytest.mark.parametrize("player", Player)
@@ -123,3 +123,87 @@ def test_get_new_game_board_provides_new_player_rows():
             for player_row in new_board.values()
         ]
     )
+
+
+@pytest.mark.parametrize(
+    "selected_bin,players_result_row,opponents_result_row",
+    [
+        (
+            0,
+            PlayerRow([0, 4, 4, 4, 4, 4], 1),
+            PlayerRow([4, 4, 4, 5, 5, 5], 0),
+        ),
+        (
+            1,
+            PlayerRow([5, 0, 4, 4, 4, 4], 1),
+            PlayerRow([4, 4, 4, 4, 5, 5], 0),
+        ),
+        (
+            2,
+            PlayerRow([5, 5, 0, 4, 4, 4], 1),
+            PlayerRow([4, 4, 4, 4, 4, 5], 0),
+        ),
+        (
+            3,
+            PlayerRow([5, 5, 5, 0, 4, 4], 1),
+            PlayerRow.get_new_player_row(),
+        ),
+        (
+            4,
+            PlayerRow([5, 5, 5, 5, 0, 4], 0),
+            PlayerRow.get_new_player_row(),
+        ),
+        (
+            5,
+            PlayerRow([4, 5, 5, 5, 5, 0], 0),
+            PlayerRow.get_new_player_row(),
+        ),
+    ],
+)
+def test_first_moves_on_a_new_game_board(
+    selected_bin, players_result_row, opponents_result_row
+):
+    # Ensure the turn works for both Players
+    player_one_turn_board = get_new_board()
+    player_one_turn = Turn(Player.ONE, selected_bin)
+    take_turn(player_one_turn_board, player_one_turn)
+    assert player_one_turn_board[Player.ONE] == players_result_row
+    assert player_one_turn_board[Player.TWO] == opponents_result_row
+
+    player_two_turn_board = get_new_board()
+    player_two_turn = Turn(Player.TWO, selected_bin)
+    take_turn(player_two_turn_board, player_two_turn)
+    assert player_two_turn_board[Player.ONE] == opponents_result_row
+    assert player_two_turn_board[Player.TWO] == players_result_row
+
+
+@pytest.mark.parametrize(
+    "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
+)
+def test_double_wrap_turn(player, opponent):
+    turn = Turn(player, 1)
+    board = {
+        player: PlayerRow(bins=[0, 10, 0, 0, 2, 0], goal=12),
+        opponent: PlayerRow(bins=[1, 6, 8, 0, 2, 7], goal=3),
+    }
+
+    take_turn(board, turn)
+
+    assert board[player] == PlayerRow(bins=[1, 0, 0, 0, 3, 1], goal=13)
+    assert board[opponent] == PlayerRow(bins=[2, 7, 9, 1, 3, 8], goal=3)
+
+
+@pytest.mark.parametrize(
+    "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
+)
+def test_double_wrap_turn_that_ends_in_goal(player, opponent):
+    turn = Turn(player, 0)
+    board = {
+        player: PlayerRow(bins=[14, 0, 0, 0, 2, 0], goal=10),
+        opponent: PlayerRow(bins=[1, 6, 4, 0, 1, 7], goal=3),
+    }
+
+    take_turn(board, turn)
+
+    assert board[player] == PlayerRow(bins=[1, 1, 1, 1, 3, 1], goal=12)
+    assert board[opponent] == PlayerRow(bins=[2, 7, 5, 1, 2, 8], goal=3)
