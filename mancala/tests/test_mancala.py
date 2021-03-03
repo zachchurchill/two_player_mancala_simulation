@@ -1,7 +1,7 @@
 import pytest
 
 from mancala.config import NUMBER_OF_BINS, NUMBER_OF_STARTING_PIECES
-from mancala.mancala import Player, PlayerRow, Turn
+from mancala.mancala import Player, PlayerRow, Turn, get_new_board
 
 
 @pytest.mark.parametrize("player", Player)
@@ -104,3 +104,22 @@ def test_player_row_provides_nice_representation():
 
     player_row = PlayerRow([12, 0, 1, 9, 10, 4], goal=10)
     assert repr(player_row) == "[ 10 | 12,  0,  1,  9, 10,  4 ]"
+
+
+def test_player_row_provides_equality_operations():
+    player_row = PlayerRow(bins=[1, 2, 3, 4, 5, 6], goal=7)
+    identical_player_row = PlayerRow(bins=[1, 2, 3, 4, 5, 6], goal=7)
+    assert player_row == identical_player_row
+    assert player_row != PlayerRow(bins=[6, 5, 4, 3, 2, 1], goal=7)
+    assert player_row != 42
+
+
+def test_get_new_game_board_provides_new_player_rows():
+    new_board = get_new_board()
+    assert Player.ONE in new_board.keys() and Player.TWO in new_board.keys()
+    assert all(
+        [
+            player_row == PlayerRow.get_new_player_row()
+            for player_row in new_board.values()
+        ]
+    )

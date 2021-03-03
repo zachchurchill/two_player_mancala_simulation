@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from mancala.config import NUMBER_OF_BINS, NUMBER_OF_STARTING_PIECES
 
@@ -42,6 +42,14 @@ class PlayerRow:
             self.goal, ", ".join(["{:>2}".format(b) for b in self.bins])
         )
 
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, PlayerRow):
+            return False
+        return (
+            all([b == other_b for b, other_b in zip(self.bins, other.bins)])
+            and self.goal == other.goal
+        )
+
     @property
     def bins(self) -> List[int]:
         return self._bins
@@ -65,3 +73,10 @@ class PlayerRow:
     def add_piece_in_bin(self, bin: int) -> None:
         _ensure_bin_selection_is_correct(bin)
         self._bins[bin] += 1
+
+
+def get_new_board() -> Dict[Player, PlayerRow]:
+    return {
+        Player.ONE: PlayerRow.get_new_player_row(),
+        Player.TWO: PlayerRow.get_new_player_row(),
+    }
