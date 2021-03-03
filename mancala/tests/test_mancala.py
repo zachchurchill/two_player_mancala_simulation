@@ -163,18 +163,21 @@ def test_get_new_game_board_provides_new_player_rows():
 def test_first_moves_on_a_new_game_board(
     selected_bin, players_result_row, opponents_result_row
 ):
-    # Ensure the turn works for both Players
+    # Ensure the turn works for both Players, and that the function
+    # does not change the original board
     player_one_turn_board = get_new_board()
     player_one_turn = Turn(Player.ONE, selected_bin)
-    take_turn(player_one_turn_board, player_one_turn)
-    assert player_one_turn_board[Player.ONE] == players_result_row
-    assert player_one_turn_board[Player.TWO] == opponents_result_row
+    new_player_one_turn_board = take_turn(player_one_turn_board, player_one_turn)
+    assert player_one_turn_board == get_new_board()
+    assert new_player_one_turn_board[Player.ONE] == players_result_row
+    assert new_player_one_turn_board[Player.TWO] == opponents_result_row
 
     player_two_turn_board = get_new_board()
     player_two_turn = Turn(Player.TWO, selected_bin)
-    take_turn(player_two_turn_board, player_two_turn)
-    assert player_two_turn_board[Player.ONE] == opponents_result_row
-    assert player_two_turn_board[Player.TWO] == players_result_row
+    new_player_two_turn_board = take_turn(player_two_turn_board, player_two_turn)
+    assert player_two_turn_board == get_new_board()
+    assert new_player_two_turn_board[Player.ONE] == opponents_result_row
+    assert new_player_two_turn_board[Player.TWO] == players_result_row
 
 
 @pytest.mark.parametrize(
@@ -187,10 +190,10 @@ def test_double_wrap_turn(player, opponent):
         opponent: PlayerRow(bins=[1, 6, 8, 0, 2, 7], goal=3),
     }
 
-    take_turn(board, turn)
+    new_board = take_turn(board, turn)
 
-    assert board[player] == PlayerRow(bins=[1, 0, 0, 0, 3, 1], goal=13)
-    assert board[opponent] == PlayerRow(bins=[2, 7, 9, 1, 3, 8], goal=3)
+    assert new_board[player] == PlayerRow(bins=[1, 0, 0, 0, 3, 1], goal=13)
+    assert new_board[opponent] == PlayerRow(bins=[2, 7, 9, 1, 3, 8], goal=3)
 
 
 @pytest.mark.parametrize(
@@ -203,7 +206,7 @@ def test_double_wrap_turn_that_ends_in_goal(player, opponent):
         opponent: PlayerRow(bins=[1, 6, 4, 0, 1, 7], goal=3),
     }
 
-    take_turn(board, turn)
+    new_board = take_turn(board, turn)
 
-    assert board[player] == PlayerRow(bins=[1, 1, 1, 1, 3, 1], goal=12)
-    assert board[opponent] == PlayerRow(bins=[2, 7, 5, 1, 2, 8], goal=3)
+    assert new_board[player] == PlayerRow(bins=[1, 1, 1, 1, 3, 1], goal=12)
+    assert new_board[opponent] == PlayerRow(bins=[2, 7, 5, 1, 2, 8], goal=3)
