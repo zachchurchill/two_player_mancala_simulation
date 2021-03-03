@@ -76,14 +76,17 @@ class PlayerRow:
         self._bins[bin] += 1
 
 
-def get_new_board() -> Dict[Player, PlayerRow]:
+Board = Dict[Player, PlayerRow]
+
+
+def get_new_board() -> Board:
     return {
         Player.ONE: PlayerRow.get_new_player_row(),
         Player.TWO: PlayerRow.get_new_player_row(),
     }
 
 
-def take_turn(board: Dict[Player, PlayerRow], turn: Turn) -> Dict[Player, PlayerRow]:
+def take_turn(board: Board, turn: Turn) -> Board:
     new_board = copy.deepcopy(board)
     opponent = Player.ONE if turn.player == Player.TWO else Player.TWO
 
@@ -149,3 +152,33 @@ def take_turn(board: Dict[Player, PlayerRow], turn: Turn) -> Dict[Player, Player
     assert pieces == 0
 
     return new_board
+
+
+def who_gets_next_turn(prior_board: Board, turn: Turn, new_board: Board) -> Player:
+    opponent = Player.ONE if turn.player == Player.TWO else Player.TWO
+
+    prior_player_bins = prior_board[turn.player].bins
+    prior_player_goal = prior_board[turn.player].goal
+    new_player_bins = new_board[turn.player].bins
+    new_player_goal = new_board[turn.player].goal
+
+    single_wrap_conditions = (
+        new_player_goal == prior_player_goal + 1
+        and prior_board[opponent].bins == new_board[opponent].bins
+    )
+
+    double_wrap_conditions = (
+        new_player_goal == prior_player_goal + 2
+        and new_player_bins[turn.selected_bin] == 1
+        and all(
+            [
+                new_player_bins[i] == prior_player_bins[i] + 2
+                for i in range(turn.selected_bin)
+            ]
+        )
+    )
+
+    if single_wrap_conditions or double_wrap_conditions:
+        return turn.player
+    else:
+        return opponent
