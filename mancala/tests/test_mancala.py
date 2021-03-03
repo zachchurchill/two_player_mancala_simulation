@@ -249,6 +249,19 @@ def test_last_piece_in_empty_bin_steals_opponents_pieces(player, opponent):
 @pytest.mark.parametrize(
     "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
 )
+def test_last_piece_in_empty_bin_only_steals_if_opponent_has_pieces(player, opponent):
+    board = {
+        player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
+        opponent: PlayerRow(bins=[1, 6, 7, 0, 3, 7], goal=3),
+    }
+    new_board = take_turn(board, Turn(player, 5))
+    assert new_board[player] == PlayerRow(bins=[0, 10, 0, 1, 1, 0], goal=12)
+    assert new_board[opponent] == PlayerRow(bins=[1, 6, 7, 0, 3, 7], goal=3)
+
+
+@pytest.mark.parametrize(
+    "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
+)
 def test_who_gets_next_turn_returns_correct_player(player, opponent):
     # player makes optimal first game move to get another turn
     prior_board = {

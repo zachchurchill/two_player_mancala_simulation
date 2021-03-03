@@ -104,7 +104,13 @@ def take_turn(board: Board, turn: Turn) -> Board:
     # If there are no pieces, then stop; otherwise, add 1 piece to the goal
     if pieces == 0:
         last_piece_landed_in = list(bin_indexes_to_increment)[0]
-        if new_board[turn.player].bins[last_piece_landed_in] == 1:
+        landed_in_previously_empty_bin = (
+            new_board[turn.player].bins[last_piece_landed_in] == 1
+        )
+        opponent_has_pieces_in_same_bin = (
+            new_board[opponent].bins[last_piece_landed_in] > 0
+        )
+        if landed_in_previously_empty_bin and opponent_has_pieces_in_same_bin:
             new_board[turn.player].bins[last_piece_landed_in] -= 1
             stolen_pieces = new_board[opponent].bins[last_piece_landed_in]
             new_board[opponent].bins[last_piece_landed_in] -= stolen_pieces
@@ -139,7 +145,13 @@ def take_turn(board: Board, turn: Turn) -> Board:
 
     if pieces == 0:
         last_piece_landed_in = list(bin_indexes_to_increment)[-1]
-        if new_board[turn.player].bins[last_piece_landed_in] == 1:
+        landed_in_previously_empty_bin = (
+            new_board[turn.player].bins[last_piece_landed_in] == 1
+        )
+        opponent_has_pieces_in_same_bin = (
+            new_board[opponent].bins[last_piece_landed_in] > 0
+        )
+        if landed_in_previously_empty_bin and opponent_has_pieces_in_same_bin:
             new_board[turn.player].bins[last_piece_landed_in] -= 1
             stolen_pieces = new_board[opponent].bins[last_piece_landed_in]
             new_board[opponent].bins[last_piece_landed_in] -= stolen_pieces
