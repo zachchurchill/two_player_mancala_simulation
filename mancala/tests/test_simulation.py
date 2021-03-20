@@ -3,7 +3,7 @@ import json
 import pytest
 
 from mancala.mancala import Player, PlayerRow, get_new_board
-from mancala.serialize import serialize
+from mancala.serialize import to_serializable
 from mancala.simulation import SimulationLoop
 from mancala.strategy import (
     AlwaysMaximumPlayerStrategy,
@@ -116,7 +116,7 @@ def test_simulation_loop_serialization():
     }
 
     # Pre-run
-    prerun_serialization = json.loads(loop.serialize())
+    prerun_serialization = json.loads(loop.to_serializable())
     assert prerun_serialization.keys() == expected_serialization_keys
     assert prerun_serialization["player_strategies"].keys() == {"one", "two"}
     assert prerun_serialization["player_strategies"]["one"] == p1.strategy_name
@@ -138,7 +138,7 @@ def test_simulation_loop_serialization():
 
     # Post-run
     loop.run()
-    postrun_serialization = json.loads(loop.serialize())
+    postrun_serialization = json.loads(loop.to_serializable())
     assert postrun_serialization.keys() == expected_serialization_keys
     assert postrun_serialization["player_strategies"].keys() == {"one", "two"}
     assert postrun_serialization["player_strategies"]["one"] == p1.strategy_name
@@ -148,8 +148,10 @@ def test_simulation_loop_serialization():
         postrun_serialization["winning_player"] == "one"
     )  # minimum strategy always wins
     assert len(postrun_serialization["turns"]) > 0
-    assert postrun_serialization["turns"] == [serialize(turn) for turn in loop.turns]
+    assert postrun_serialization["turns"] == [
+        to_serializable(turn) for turn in loop.turns
+    ]
     assert len(postrun_serialization["boards"]) > 1
     assert postrun_serialization["boards"] == [
-        serialize(board) for board in loop.boards
+        to_serializable(board) for board in loop.boards
     ]
