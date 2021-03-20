@@ -152,17 +152,6 @@ class SimulationLoop:
                 "starting_player": serialize(self._starting_player),
                 "winning_player": None,
                 "turns": [],
-                "boards": [
-                    {
-                        serialize(p1): {
-                            "bins": [4, 4, 4, 4, 4, 4],
-                            "goal": 0,
-                        },
-                        serialize(p2): {
-                            "bins": [4, 4, 4, 4, 4, 4],
-                            "goal": 0,
-                        },
-                    },
-                ],
+                "boards": [serialize(board) for board in self._boards],
             }
         )
