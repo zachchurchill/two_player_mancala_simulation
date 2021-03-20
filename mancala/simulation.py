@@ -11,6 +11,7 @@ from mancala.mancala import (
     take_turn,
     who_gets_next_turn,
 )
+from mancala.serialize import serialize
 from mancala.strategy import PlayerStrategy
 
 
@@ -143,19 +144,19 @@ class SimulationLoop:
         return json.dumps(
             {
                 "player_strategies": {
-                    p1.serialized_value: self._strategies[p1].strategy_name,
-                    p2.serialized_value: self._strategies[p2].strategy_name,
+                    serialize(p1): self._strategies[p1].strategy_name,
+                    serialize(p2): self._strategies[p2].strategy_name,
                 },
-                "starting_player": self._starting_player.serialized_value,
+                "starting_player": serialize(self._starting_player),
                 "winning_player": None,
                 "turns": [],
                 "boards": [
                     {
-                        p1.serialized_value: {
+                        serialize(p1): {
                             "bins": [4, 4, 4, 4, 4, 4],
                             "goal": 0,
                         },
-                        p2.serialized_value: {
+                        serialize(p2): {
                             "bins": [4, 4, 4, 4, 4, 4],
                             "goal": 0,
                         },
