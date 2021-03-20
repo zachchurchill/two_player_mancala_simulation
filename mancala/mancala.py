@@ -10,6 +10,13 @@ class Player(Enum):
     ONE = 0
     TWO = 1
 
+    @property
+    def serialized_value(self) -> str:
+        if self == Player.ONE:
+            return "one"
+        else:
+            return "two"
+
 
 def _ensure_bin_selection_is_correct(selected_bin: int) -> None:
     upper_bound = NUMBER_OF_BINS - 1

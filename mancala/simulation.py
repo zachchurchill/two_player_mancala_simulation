@@ -1,3 +1,4 @@
+import json
 import random
 from typing import Dict, List, Optional
 
@@ -135,3 +136,30 @@ class SimulationLoop:
                 break
             current_player = who_gets_next_turn(current_board, turn, new_board)
             current_turn += 1
+
+    def serialize(self) -> str:
+        p1 = Player.ONE
+        p2 = Player.TWO
+        return json.dumps(
+            {
+                "player_strategies": {
+                    p1.serialized_value: self._strategies[p1].strategy_name,
+                    p2.serialized_value: self._strategies[p2].strategy_name,
+                },
+                "starting_player": self._starting_player.serialized_value,
+                "winning_player": None,
+                "turns": [],
+                "boards": [
+                    {
+                        p1.serialized_value: {
+                            "bins": [4, 4, 4, 4, 4, 4],
+                            "goal": 0,
+                        },
+                        p2.serialized_value: {
+                            "bins": [4, 4, 4, 4, 4, 4],
+                            "goal": 0,
+                        },
+                    },
+                ],
+            }
+        )

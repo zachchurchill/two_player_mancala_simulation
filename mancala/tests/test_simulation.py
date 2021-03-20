@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from mancala.mancala import Player, PlayerRow, get_new_board
@@ -98,3 +100,36 @@ def test_simulation_loop_stops_if_there_is_a_tie():
     last_board = loop.boards[-1]
     assert last_board[Player.ONE].goal == 24
     assert last_board[Player.TWO].goal == 24
+
+
+def test_simulation_loop_serialization_pre_run():
+    p1 = AlwaysMinimumPlayerStrategy()
+    p2 = AlwaysMaximumPlayerStrategy()
+    loop = SimulationLoop(player_one=p1, player_two=p2)
+    expected_serialization_keys = {
+        "player_strategies",
+        "starting_player",
+        "winning_player",
+        "turns",
+        "boards",
+    }
+
+    actual_serialization = json.loads(loop.serialize())
+    assert actual_serialization.keys() == expected_serialization_keys
+    assert actual_serialization["player_strategies"].keys() == {"one", "two"}
+    assert actual_serialization["player_strategies"]["one"] == p1.strategy_name
+    assert actual_serialization["player_strategies"]["two"] == p2.strategy_name
+    assert actual_serialization["starting_player"] in ["one", "two"]
+    assert actual_serialization["winning_player"] is None
+    assert len(actual_serialization["turns"]) == 0
+    assert len(actual_serialization["boards"]) == 1
+    assert actual_serialization["boards"][0] == {
+        "one": {
+            "bins": [4, 4, 4, 4, 4, 4],
+            "goal": 0,
+        },
+        "two": {
+            "bins": [4, 4, 4, 4, 4, 4],
+            "goal": 0,
+        },
+    }

@@ -11,6 +11,11 @@ from mancala.mancala import (
 )
 
 
+def test_player_provides_string_for_serialized_value():
+    assert Player.ONE.serialized_value == "one"
+    assert Player.TWO.serialized_value == "two"
+
+
 @pytest.mark.parametrize("player", Player)
 def test_turn_selected_bin_must_exist_on_board(player):
     with pytest.raises(ValueError):
