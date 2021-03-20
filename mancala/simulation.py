@@ -58,19 +58,17 @@ class SimulationLoop:
             return {self._winning_player: self._strategies[self._winning_player]}
         return None
 
-    def _is_end_of_game(self) -> bool:  # pragma: nocover
+    def _is_end_of_game(self) -> bool:
         """In reality, the first player to get >24 pieces is the winner."""
         latest_board = self.boards[-1]
         return latest_board[Player.ONE].goal > 24 or latest_board[Player.TWO].goal > 24
 
-    def _set_winner(self) -> None:  # pragma: nocover
+    def _set_winner(self) -> None:
         latest_board = self.boards[-1]
         if latest_board[Player.ONE].goal > 24:
             self._winning_player = Player.ONE
         elif latest_board[Player.TWO].goal > 24:
             self._winning_player = Player.TWO
-        else:
-            raise RuntimeError("winner has not been establish yet")
 
     def run(self, reset_simulation=False) -> None:  # pragma: nocover
         if self.has_run and not reset_simulation:

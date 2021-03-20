@@ -2,7 +2,11 @@ import pytest
 
 from mancala.mancala import Player, PlayerRow, get_new_board
 from mancala.simulation import SimulationLoop
-from mancala.strategy import ExampleRandomPlayerStrategy
+from mancala.strategy import (
+    AlwaysMaximumPlayerStrategy,
+    AlwaysMinimumPlayerStrategy,
+    ExampleRandomPlayerStrategy,
+)
 
 
 def test_simulation_loops_provides_player_strategies_in_dict_format():
@@ -50,10 +54,16 @@ def test_simulation_loop_starts_with_no_turns():
     assert len(loop.turns) == 0
 
 
-def test_simulation_loop_stops_when_goal_is_over_24():
-    player_one = ExampleRandomPlayerStrategy()
-    player_two = ExampleRandomPlayerStrategy()
-    loop = SimulationLoop(player_one=player_one, player_two=player_two)
+# The Minimum strategy always beats the Minimum strategy
+@pytest.mark.parametrize(
+    "p1,p2,expected_winner",
+    [
+        (AlwaysMaximumPlayerStrategy(), AlwaysMinimumPlayerStrategy(), Player.TWO),
+        (AlwaysMinimumPlayerStrategy(), AlwaysMaximumPlayerStrategy(), Player.ONE),
+    ],
+)
+def test_simulation_loop_stops_when_goal_is_over_24(p1, p2, expected_winner):
+    loop = SimulationLoop(player_one=p1, player_two=p2)
     assert loop.has_run is False
     assert loop.winning_player is None
 
@@ -62,10 +72,29 @@ def test_simulation_loop_stops_when_goal_is_over_24():
     assert len(loop.turns) > 1
     assert len(loop.boards) > 1
 
-    if loop.winning_player:  # pragma: nocover
-        winning_player, *_ = loop.winning_player.keys()
-        assert loop.boards[-1][winning_player].goal >= 24
-    else:  # pragma: nocover
-        last_board = loop.boards[-1]
-        assert last_board[Player.ONE].goal == 24
-        assert last_board[Player.TWO].goal == 24
+    assert loop.winning_player is not None
+    winning_player_enum, *_ = loop.winning_player.keys()
+    winning_player_strategy, *_ = loop.winning_player.values()
+    assert winning_player_enum == expected_winner
+    assert isinstance(winning_player_strategy, AlwaysMinimumPlayerStrategy)
+
+    assert loop.boards[-1][winning_player_enum].goal >= 24
+
+
+def test_simulation_loop_stops_if_there_is_a_tie():
+    loop = SimulationLoop(
+        player_one=AlwaysMinimumPlayerStrategy(),
+        player_two=AlwaysMinimumPlayerStrategy(),
+    )
+    assert loop.has_run is False
+    assert loop.winning_player is None
+
+    loop.run()
+    assert loop.has_run is True
+    assert len(loop.turns) > 1
+    assert len(loop.boards) > 1
+    assert loop.winning_player is None
+
+    last_board = loop.boards[-1]
+    assert last_board[Player.ONE].goal == 24
+    assert last_board[Player.TWO].goal == 24
