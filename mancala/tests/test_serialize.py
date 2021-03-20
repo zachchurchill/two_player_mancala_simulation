@@ -1,6 +1,6 @@
 import pytest
 
-from mancala.mancala import Player, PlayerRow
+from mancala.mancala import Player, PlayerRow, Turn
 from mancala.serialize import serialize
 
 
@@ -24,6 +24,8 @@ def test_serialize_returns_type_error_for_unregistered_type():
                 "goal": PlayerRow.get_new_player_row().goal,
             },
         ),
+        (Turn(Player.ONE, 4), {"player": "one", "selected_bin": 4}),
+        (Turn(Player.TWO, 2), {"player": "two", "selected_bin": 2}),
     ],
 )
 def test_serialize_returns_correct_serialization(serializable, serialized):
