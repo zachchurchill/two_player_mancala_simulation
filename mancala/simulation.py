@@ -28,7 +28,7 @@ class SimulationLoop:
         self._starting_player = random.choice([Player.ONE, Player.TWO])
         self._winning_player: Optional[Player] = None
         self._turns: List[Turn] = []
-        self._boards = [get_new_board()]
+        self._boards: List[Board] = [get_new_board()]
 
     @property
     def player_one(self) -> Dict[Player, PlayerStrategy]:
@@ -100,14 +100,16 @@ class SimulationLoop:
                     resulting_player_two_goal = (
                         sum(player_two_row.bins) + player_two_row.goal
                     )
-                    new_board = {
-                        Player.ONE: PlayerRow(
-                            bins=[0, 0, 0, 0, 0, 0], goal=resulting_player_one_goal
-                        ),
-                        Player.TWO: PlayerRow(
-                            bins=[0, 0, 0, 0, 0, 0], goal=resulting_player_two_goal
-                        ),
-                    }
+                    new_board = Board(
+                        {
+                            Player.ONE: PlayerRow(
+                                bins=[0, 0, 0, 0, 0, 0], goal=resulting_player_one_goal
+                            ),
+                            Player.TWO: PlayerRow(
+                                bins=[0, 0, 0, 0, 0, 0], goal=resulting_player_two_goal
+                            ),
+                        }
+                    )
                     # self._turns.append(Turn.GameEndingTurn)  TODO
                     self._boards.append(new_board)
                     if resulting_player_one_goal > resulting_player_two_goal:

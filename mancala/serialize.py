@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Any, Dict, List, Union
 
-from mancala.mancala import Player, PlayerRow, Turn
+from mancala.mancala import Board, Player, PlayerRow, Turn
 
 
 @singledispatch
@@ -26,3 +26,8 @@ def serialize_player_row(arg: PlayerRow) -> Dict[str, Union[List[int], int]]:
 @serialize.register
 def serialize_turn(arg: Turn) -> Dict[str, Union[str, int]]:
     return {"player": serialize(arg.player), "selected_bin": arg.selected_bin}
+
+
+@serialize.register
+def serialize_board(arg: Board) -> Dict[str, Dict[str, Union[List[int], int]]]:
+    return {serialize(p): serialize(p_row) for p, p_row in arg.items()}

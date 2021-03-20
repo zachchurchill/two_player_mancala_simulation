@@ -76,14 +76,17 @@ class PlayerRow:
         self._bins[bin] += 1
 
 
-Board = Dict[Player, PlayerRow]
+class Board(Dict[Player, PlayerRow]):
+    pass
 
 
 def get_new_board() -> Board:
-    return {
-        Player.ONE: PlayerRow.get_new_player_row(),
-        Player.TWO: PlayerRow.get_new_player_row(),
-    }
+    return Board(
+        {
+            Player.ONE: PlayerRow.get_new_player_row(),
+            Player.TWO: PlayerRow.get_new_player_row(),
+        }
+    )
 
 
 def take_turn(board: Board, turn: Turn) -> Board:

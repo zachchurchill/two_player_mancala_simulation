@@ -2,6 +2,7 @@ import pytest
 
 from mancala.config import NUMBER_OF_BINS, NUMBER_OF_STARTING_PIECES
 from mancala.mancala import (
+    Board,
     Player,
     PlayerRow,
     Turn,
@@ -192,10 +193,12 @@ def test_first_moves_on_a_new_game_board(
 )
 def test_double_wrap_turn(player, opponent):
     turn = Turn(player, 1)
-    board = {
-        player: PlayerRow(bins=[0, 10, 0, 0, 2, 0], goal=12),
-        opponent: PlayerRow(bins=[1, 6, 8, 0, 2, 7], goal=3),
-    }
+    board = Board(
+        {
+            player: PlayerRow(bins=[0, 10, 0, 0, 2, 0], goal=12),
+            opponent: PlayerRow(bins=[1, 6, 8, 0, 2, 7], goal=3),
+        }
+    )
 
     new_board = take_turn(board, turn)
 
@@ -208,10 +211,12 @@ def test_double_wrap_turn(player, opponent):
 )
 def test_double_wrap_turn_that_ends_in_goal(player, opponent):
     turn = Turn(player, 0)
-    board = {
-        player: PlayerRow(bins=[14, 0, 0, 0, 2, 0], goal=10),
-        opponent: PlayerRow(bins=[1, 6, 4, 0, 1, 7], goal=3),
-    }
+    board = Board(
+        {
+            player: PlayerRow(bins=[14, 0, 0, 0, 2, 0], goal=10),
+            opponent: PlayerRow(bins=[1, 6, 4, 0, 1, 7], goal=3),
+        }
+    )
 
     new_board = take_turn(board, turn)
 
@@ -224,10 +229,12 @@ def test_double_wrap_turn_that_ends_in_goal(player, opponent):
 )
 def test_triple_wrap_turn(player, opponent):
     turn = Turn(player, 0)
-    board = {
-        player: PlayerRow(bins=[16, 1, 5, 0, 5, 2], goal=6),
-        opponent: PlayerRow(bins=[0, 2, 1, 2, 1, 0], goal=7),
-    }
+    board = Board(
+        {
+            player: PlayerRow(bins=[16, 1, 5, 0, 5, 2], goal=6),
+            opponent: PlayerRow(bins=[0, 2, 1, 2, 1, 0], goal=7),
+        }
+    )
 
     new_board = take_turn(board, turn)
 
@@ -246,10 +253,12 @@ def test_last_piece_in_empty_bin_steals_opponents_pieces(player, opponent):
     opponents side. Both the last piece that landed in the previously empty
     bin and their opponents pieces go into the player's goal.
     """
-    board = {
-        player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
-        opponent: PlayerRow(bins=[1, 6, 7, 1, 2, 7], goal=3),
-    }
+    board = Board(
+        {
+            player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
+            opponent: PlayerRow(bins=[1, 6, 7, 1, 2, 7], goal=3),
+        }
+    )
 
     # In-player row scenario
     in_player_row_board = take_turn(board, Turn(player, 5))
@@ -266,10 +275,12 @@ def test_last_piece_in_empty_bin_steals_opponents_pieces(player, opponent):
     "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
 )
 def test_last_piece_in_empty_bin_only_steals_if_opponent_has_pieces(player, opponent):
-    board = {
-        player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
-        opponent: PlayerRow(bins=[1, 6, 7, 0, 3, 7], goal=3),
-    }
+    board = Board(
+        {
+            player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
+            opponent: PlayerRow(bins=[1, 6, 7, 0, 3, 7], goal=3),
+        }
+    )
     new_board = take_turn(board, Turn(player, 5))
     assert new_board[player] == PlayerRow(bins=[0, 10, 0, 1, 1, 0], goal=12)
     assert new_board[opponent] == PlayerRow(bins=[1, 6, 7, 0, 3, 7], goal=3)
@@ -280,49 +291,65 @@ def test_last_piece_in_empty_bin_only_steals_if_opponent_has_pieces(player, oppo
 )
 def test_who_gets_next_turn_returns_correct_player(player, opponent):
     # player makes optimal first game move to get another turn
-    prior_board = {
-        player: PlayerRow(bins=[4, 4, 4, 4, 4, 4], goal=0),
-        opponent: PlayerRow(bins=[4, 4, 4, 4, 4, 4], goal=0),
-    }
+    prior_board = Board(
+        {
+            player: PlayerRow(bins=[4, 4, 4, 4, 4, 4], goal=0),
+            opponent: PlayerRow(bins=[4, 4, 4, 4, 4, 4], goal=0),
+        }
+    )
     turn = Turn(player, 3)
-    new_board = {
-        player: PlayerRow(bins=[5, 5, 5, 0, 4, 4], goal=1),
-        opponent: PlayerRow.get_new_player_row(),
-    }
+    new_board = Board(
+        {
+            player: PlayerRow(bins=[5, 5, 5, 0, 4, 4], goal=1),
+            opponent: PlayerRow.get_new_player_row(),
+        }
+    )
     assert who_gets_next_turn(prior_board, turn, new_board) == player
 
     # player makes a move to steal pieces from opponent
-    prior_board = {
-        player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
-        opponent: PlayerRow(bins=[1, 6, 7, 1, 2, 7], goal=3),
-    }
+    prior_board = Board(
+        {
+            player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
+            opponent: PlayerRow(bins=[1, 6, 7, 1, 2, 7], goal=3),
+        }
+    )
     turn = Turn(player, 5)
-    new_board = {
-        player: PlayerRow(bins=[0, 10, 0, 0, 1, 0], goal=14),
-        opponent: PlayerRow(bins=[1, 6, 7, 0, 2, 7], goal=3),
-    }
+    new_board = Board(
+        {
+            player: PlayerRow(bins=[0, 10, 0, 0, 1, 0], goal=14),
+            opponent: PlayerRow(bins=[1, 6, 7, 0, 2, 7], goal=3),
+        }
+    )
     assert who_gets_next_turn(prior_board, turn, new_board) == opponent
 
     # player makes double-wrap move to steal pieces from opponent
-    prior_board = {
-        player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
-        opponent: PlayerRow(bins=[1, 6, 7, 1, 2, 7], goal=3),
-    }
+    prior_board = Board(
+        {
+            player: PlayerRow(bins=[0, 10, 0, 0, 0, 2], goal=12),
+            opponent: PlayerRow(bins=[1, 6, 7, 1, 2, 7], goal=3),
+        }
+    )
     turn = Turn(player, 1)
-    new_board = {
-        player: PlayerRow(bins=[1, 0, 0, 0, 0, 3], goal=17),
-        opponent: PlayerRow(bins=[2, 7, 8, 2, 0, 8], goal=3),
-    }
+    new_board = Board(
+        {
+            player: PlayerRow(bins=[1, 0, 0, 0, 0, 3], goal=17),
+            opponent: PlayerRow(bins=[2, 7, 8, 2, 0, 8], goal=3),
+        }
+    )
     assert who_gets_next_turn(prior_board, turn, new_board) == opponent
 
     # player makes double-wrap move and ends in goal
-    prior_board = {
-        player: PlayerRow(bins=[14, 0, 0, 0, 2, 0], goal=10),
-        opponent: PlayerRow(bins=[1, 6, 4, 0, 1, 7], goal=3),
-    }
+    prior_board = Board(
+        {
+            player: PlayerRow(bins=[14, 0, 0, 0, 2, 0], goal=10),
+            opponent: PlayerRow(bins=[1, 6, 4, 0, 1, 7], goal=3),
+        }
+    )
     turn = Turn(player, 0)
-    new_board = {
-        player: PlayerRow(bins=[1, 1, 1, 1, 3, 1], goal=12),
-        opponent: PlayerRow(bins=[2, 7, 5, 1, 2, 8], goal=3),
-    }
+    new_board = Board(
+        {
+            player: PlayerRow(bins=[1, 1, 1, 1, 3, 1], goal=12),
+            opponent: PlayerRow(bins=[2, 7, 5, 1, 2, 8], goal=3),
+        }
+    )
     assert who_gets_next_turn(prior_board, turn, new_board) == player
