@@ -222,6 +222,22 @@ def test_double_wrap_turn_that_ends_in_goal(player, opponent):
 @pytest.mark.parametrize(
     "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
 )
+def test_triple_wrap_turn(player, opponent):
+    turn = Turn(player, 0)
+    board = {
+        player: PlayerRow(bins=[16, 1, 5, 0, 5, 2], goal=6),
+        opponent: PlayerRow(bins=[0, 2, 1, 2, 1, 0], goal=7),
+    }
+
+    new_board = take_turn(board, turn)
+
+    assert new_board[player] == PlayerRow(bins=[1, 2, 6, 1, 6, 3], goal=8)
+    assert new_board[opponent] == PlayerRow(bins=[1, 3, 2, 3, 3, 2], goal=7)
+
+
+@pytest.mark.parametrize(
+    "player,opponent", [(Player.ONE, Player.TWO), (Player.TWO, Player.ONE)]
+)
 def test_last_piece_in_empty_bin_steals_opponents_pieces(player, opponent):
     """
     The idea here is that if a player takes a turn that results

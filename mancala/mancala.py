@@ -160,8 +160,17 @@ def take_turn(board: Board, turn: Turn) -> Board:
     new_board[turn.player].add_pieces_to_goal(1)
     pieces -= 1
 
-    # This will help catch rare cases when it wraps back to the opponents row
-    assert pieces == 0
+    # If there are no pieces, then stop; otherwise, continue to opponent's row
+    if pieces == 0:
+        return new_board
+
+    last_bin_index = len(new_board[opponent].bins) - 1
+    bin_indexes_to_increment = range(
+        last_bin_index, max(-1, last_bin_index - pieces), -1
+    )
+    pieces -= len(bin_indexes_to_increment)
+    for bin_index in bin_indexes_to_increment:
+        new_board[opponent].add_piece_in_bin(bin_index)
 
     return new_board
 
