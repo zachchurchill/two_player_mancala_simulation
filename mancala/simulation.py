@@ -150,8 +150,8 @@ class SimulationLoop:
                     serialize(p2): self._strategies[p2].strategy_name,
                 },
                 "starting_player": serialize(self._starting_player),
-                "winning_player": None,
-                "turns": [],
-                "boards": [serialize(board) for board in self._boards],
+                "winning_player": serialize(self._winning_player),
+                "turns": [serialize(turn) for turn in self.turns],
+                "boards": [serialize(board) for board in self.boards],
             }
         )

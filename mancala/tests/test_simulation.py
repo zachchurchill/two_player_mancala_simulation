@@ -3,6 +3,7 @@ import json
 import pytest
 
 from mancala.mancala import Player, PlayerRow, get_new_board
+from mancala.serialize import serialize
 from mancala.simulation import SimulationLoop
 from mancala.strategy import (
     AlwaysMaximumPlayerStrategy,
@@ -56,7 +57,7 @@ def test_simulation_loop_starts_with_no_turns():
     assert len(loop.turns) == 0
 
 
-# The Minimum strategy always beats the Minimum strategy
+# The Minimum strategy always beats the Maximum strategy
 @pytest.mark.parametrize(
     "p1,p2,expected_winner",
     [
@@ -102,7 +103,7 @@ def test_simulation_loop_stops_if_there_is_a_tie():
     assert last_board[Player.TWO].goal == 24
 
 
-def test_simulation_loop_serialization_pre_run():
+def test_simulation_loop_serialization():
     p1 = AlwaysMinimumPlayerStrategy()
     p2 = AlwaysMaximumPlayerStrategy()
     loop = SimulationLoop(player_one=p1, player_two=p2)
@@ -114,16 +115,17 @@ def test_simulation_loop_serialization_pre_run():
         "boards",
     }
 
-    actual_serialization = json.loads(loop.serialize())
-    assert actual_serialization.keys() == expected_serialization_keys
-    assert actual_serialization["player_strategies"].keys() == {"one", "two"}
-    assert actual_serialization["player_strategies"]["one"] == p1.strategy_name
-    assert actual_serialization["player_strategies"]["two"] == p2.strategy_name
-    assert actual_serialization["starting_player"] in ["one", "two"]
-    assert actual_serialization["winning_player"] is None
-    assert len(actual_serialization["turns"]) == 0
-    assert len(actual_serialization["boards"]) == 1
-    assert actual_serialization["boards"][0] == {
+    # Pre-run
+    prerun_serialization = json.loads(loop.serialize())
+    assert prerun_serialization.keys() == expected_serialization_keys
+    assert prerun_serialization["player_strategies"].keys() == {"one", "two"}
+    assert prerun_serialization["player_strategies"]["one"] == p1.strategy_name
+    assert prerun_serialization["player_strategies"]["two"] == p2.strategy_name
+    assert prerun_serialization["starting_player"] in ["one", "two"]
+    assert prerun_serialization["winning_player"] is None
+    assert len(prerun_serialization["turns"]) == 0
+    assert len(prerun_serialization["boards"]) == 1
+    assert prerun_serialization["boards"][0] == {
         "one": {
             "bins": [4, 4, 4, 4, 4, 4],
             "goal": 0,
@@ -133,3 +135,21 @@ def test_simulation_loop_serialization_pre_run():
             "goal": 0,
         },
     }
+
+    # Post-run
+    loop.run()
+    postrun_serialization = json.loads(loop.serialize())
+    assert postrun_serialization.keys() == expected_serialization_keys
+    assert postrun_serialization["player_strategies"].keys() == {"one", "two"}
+    assert postrun_serialization["player_strategies"]["one"] == p1.strategy_name
+    assert postrun_serialization["player_strategies"]["two"] == p2.strategy_name
+    assert postrun_serialization["starting_player"] in ["one", "two"]
+    assert (
+        postrun_serialization["winning_player"] == "one"
+    )  # minimum strategy always wins
+    assert len(postrun_serialization["turns"]) > 0
+    assert postrun_serialization["turns"] == [serialize(turn) for turn in loop.turns]
+    assert len(postrun_serialization["boards"]) > 1
+    assert postrun_serialization["boards"] == [
+        serialize(board) for board in loop.boards
+    ]

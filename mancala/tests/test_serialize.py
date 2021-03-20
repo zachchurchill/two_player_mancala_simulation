@@ -15,6 +15,7 @@ def test_serialize_returns_type_error_for_unregistered_type():
 @pytest.mark.parametrize(
     "serializable,serialized",
     [
+        (None, None),
         (Player.ONE, "one"),
         (Player.TWO, "two"),
         (

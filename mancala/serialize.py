@@ -10,6 +10,11 @@ def serialize(arg) -> Any:
 
 
 @serialize.register
+def serialize_none(arg: None) -> None:
+    return None
+
+
+@serialize.register
 def serialize_player(arg: Player) -> str:
     enum_to_serialized_value = {
         Player.ONE: "one",
