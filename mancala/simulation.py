@@ -75,7 +75,8 @@ class SimulationLoop:
     def run(self, reset_simulation=False) -> None:  # pragma: nocover
         if self.has_run and not reset_simulation:
             return
-        self._reset_simulation()
+        if reset_simulation:
+            self._reset_simulation()
 
         current_player = self._starting_player
         current_turn = 0
