@@ -55,7 +55,7 @@ class AlwaysMaximumPlayerStrategy(PlayerStrategy):
         nonempty_bins_with_index = [
             (i, b_i) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
-        # Return first index with the minimal amount of pieces in bin
+        # Return first index with the maximum amount of pieces in bin
         if len(nonempty_bins_with_index) > 0:
             return max(nonempty_bins_with_index, key=lambda item: item[1])[0]
         else:
