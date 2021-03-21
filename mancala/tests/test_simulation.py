@@ -116,7 +116,7 @@ def test_simulation_loop_serialization():
     }
 
     # Pre-run
-    prerun_serialization = json.loads(loop.to_serializable())
+    prerun_serialization = json.loads(loop.serialize())
     assert prerun_serialization.keys() == expected_serialization_keys
     assert prerun_serialization["player_strategies"].keys() == {"one", "two"}
     assert prerun_serialization["player_strategies"]["one"] == p1.strategy_name
@@ -138,7 +138,7 @@ def test_simulation_loop_serialization():
 
     # Post-run
     loop.run()
-    postrun_serialization = json.loads(loop.to_serializable())
+    postrun_serialization = json.loads(loop.serialize())
     assert postrun_serialization.keys() == expected_serialization_keys
     assert postrun_serialization["player_strategies"].keys() == {"one", "two"}
     assert postrun_serialization["player_strategies"]["one"] == p1.strategy_name

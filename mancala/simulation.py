@@ -140,7 +140,7 @@ class SimulationLoop:
             current_player = who_gets_next_turn(current_board, turn, new_board)
             current_turn += 1
 
-    def to_serializable(self) -> str:
+    def serialize(self) -> str:
         p1 = Player.ONE
         p2 = Player.TWO
         return json.dumps(
