@@ -22,7 +22,17 @@ def test_simulation_loops_provides_player_strategies_in_dict_format():
     assert loop.player_two[Player.TWO] == player_two
 
 
-def test_simulation_loop_sets_up_starting_player_upon_instantiation():
+@pytest.mark.parametrize("player", Player)
+def test_simulation_loop_provides_option_to_choose_starting_player(player):
+    loop = SimulationLoop(
+        player_one=ExampleRandomPlayerStrategy(),
+        player_two=ExampleRandomPlayerStrategy(),
+        starting_player=player,
+    )
+    assert loop.starting_player.keys() == {player}
+
+
+def test_simulation_loop_sets_up_starting_player_if_not_provided():
     loop = SimulationLoop(
         player_one=ExampleRandomPlayerStrategy(),
         player_two=ExampleRandomPlayerStrategy(),

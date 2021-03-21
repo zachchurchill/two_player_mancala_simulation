@@ -16,16 +16,24 @@ from mancala.strategy import PlayerStrategy
 
 
 class SimulationLoop:
-    def __init__(self, player_one: PlayerStrategy, player_two: PlayerStrategy):
+    def __init__(
+        self,
+        player_one: PlayerStrategy,
+        player_two: PlayerStrategy,
+        starting_player: Optional[Player] = None,
+    ):
         self._strategies = {
             Player.ONE: player_one,
             Player.TWO: player_two,
         }
+        if starting_player:
+            self._starting_player = starting_player
+        else:
+            self._starting_player = random.choice([Player.ONE, Player.TWO])
         self._reset_simulation()
 
     def _reset_simulation(self) -> None:
         self._has_run = False
-        self._starting_player = random.choice([Player.ONE, Player.TWO])
         self._winning_player: Optional[Player] = None
         self._turns: List[Turn] = []
         self._boards: List[Board] = [get_new_board()]
