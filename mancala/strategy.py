@@ -1,5 +1,6 @@
 import random
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from mancala.mancala import PlayerRow
 
@@ -11,7 +12,9 @@ class PlayerStrategy(metaclass=ABCMeta):
         """Provide a unique name for the strategy."""
 
     @abstractmethod
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         """Provides the player's bin selection for the Turn."""
 
 
@@ -20,7 +23,9 @@ class ExampleRandomPlayerStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "random-selection"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         nonempty_bins_with_index = [
             (i, b_i) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
@@ -35,7 +40,9 @@ class AlwaysMinimumPlayerStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "always-minimum"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         nonempty_bins_with_index = [
             (i, b_i) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
@@ -51,7 +58,9 @@ class AlwaysMaximumPlayerStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "always-maximum"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         nonempty_bins_with_index = [
             (i, b_i) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
@@ -84,7 +93,9 @@ class EvenGoalOrPiecesOnOtherSideStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "even-goal-or-more-pieces-to-opponent"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         if all(b_i == 0 for b_i in player_row.bins):
             raise ValueError("player_row does not contain any non-empty-bins")
 
