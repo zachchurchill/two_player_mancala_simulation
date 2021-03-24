@@ -2,11 +2,12 @@ from typing import List
 
 import pytest
 
-from mancala.mancala import PlayerRow
+from mancala.mancala import Board, Player, PlayerRow
 from mancala.strategy import (
     AlwaysMaximumPlayerStrategy,
     AlwaysMinimumPlayerStrategy,
     EvenGoalOrPiecesOnOtherSideStrategy,
+    EvenGoalStealAndPiecesOnOtherSideStrategy,
     ExampleRandomPlayerStrategy,
     PlayerStrategy,
 )
@@ -17,6 +18,7 @@ def _get_all_strategies() -> List[PlayerStrategy]:
         AlwaysMaximumPlayerStrategy(),
         AlwaysMinimumPlayerStrategy(),
         EvenGoalOrPiecesOnOtherSideStrategy(),
+        EvenGoalStealAndPiecesOnOtherSideStrategy(),
         ExampleRandomPlayerStrategy(),
     ]
 
@@ -109,3 +111,77 @@ def test_even_goal_strategy_chooses_bin_with_max_opponent_pieces(
         even_goal_strategy.choose_bin(PlayerRow(bins=bins, goal=0))
         == expected_selection
     )
+
+
+@pytest.mark.parametrize(
+    "boards,expected_selection",
+    [
+        (
+            Board(
+                {
+                    Player.ONE: PlayerRow(bins=[4, 4, 4, 4, 4, 4], goal=0),
+                    Player.TWO: PlayerRow(bins=[4, 4, 4, 4, 4, 4], goal=0),
+                }
+            ),
+            3,
+        ),
+        (
+            Board(
+                {
+                    Player.ONE: PlayerRow(bins=[0, 6, 7, 2, 0, 5], goal=4),
+                    Player.TWO: PlayerRow(bins=[0, 5, 6, 7, 1, 6], goal=2),
+                }
+            ),
+            1,
+        ),
+        (
+            Board(
+                {
+                    Player.ONE: PlayerRow(bins=[1, 8, 2, 4, 2, 0], goal=7),
+                    Player.TWO: PlayerRow(bins=[1, 6, 8, 0, 2, 7], goal=3),
+                }
+            ),
+            0,
+        ),
+        (
+            Board(
+                {
+                    Player.ONE: PlayerRow(bins=[0, 0, 0, 0, 3, 2], goal=13),
+                    Player.TWO: PlayerRow(bins=[2, 7, 9, 1, 3, 8], goal=3),
+                }
+            ),
+            4,
+        ),
+        (
+            Board(
+                {
+                    Player.ONE: PlayerRow(bins=[0, 0, 0, 0, 3, 2], goal=13),
+                    Player.TWO: PlayerRow(bins=[2, 1, 9, 7, 3, 8], goal=3),
+                }
+            ),
+            5,
+        ),
+        (
+            Board(
+                {
+                    Player.ONE: PlayerRow(bins=[0, 0, 0, 4, 3, 2], goal=9),
+                    Player.TWO: PlayerRow(bins=[2, 1, 9, 7, 3, 8], goal=3),
+                }
+            ),
+            3,
+        ),
+    ],
+)
+def test_even_goal_stealing_shedding_chooses_correct_bin(boards, expected_selection):
+    """Note: All tests have been set up such that Player.ONE is the current player."""
+    strategy = EvenGoalStealAndPiecesOnOtherSideStrategy()
+    assert (
+        strategy.choose_bin(boards[Player.ONE], boards[Player.TWO])
+        == expected_selection
+    )
+
+
+def test_even_goal_stealing_shedding_requires_opponent_row():
+    strategy = EvenGoalStealAndPiecesOnOtherSideStrategy()
+    with pytest.raises(ValueError):
+        strategy.choose_bin(player_row=PlayerRow.get_new_player_row())

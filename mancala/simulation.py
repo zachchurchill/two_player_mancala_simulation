@@ -93,10 +93,15 @@ class SimulationLoop:
             current_board = self._boards[current_turn]
             current_player_row = current_board[current_player]
             current_player_strategy = self._strategies[current_player]
+            current_opponent_row = current_board[
+                Player.ONE if current_player == Player.TWO else Player.TWO
+            ]
 
             # Allow current player to select a bin from their row, and ensure it is valid
             try:
-                selected_bin = current_player_strategy.choose_bin(current_player_row)
+                selected_bin = current_player_strategy.choose_bin(
+                    current_player_row, current_opponent_row
+                )
             except ValueError:
                 # Assuming ValueError is thrown if player can't move, i.e. all bins are empty
                 if all([b == 0 for b in current_player_row.bins]):

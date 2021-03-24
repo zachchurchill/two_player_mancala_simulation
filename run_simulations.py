@@ -8,6 +8,7 @@ from mancala.strategy import (
     AlwaysMaximumPlayerStrategy,
     AlwaysMinimumPlayerStrategy,
     EvenGoalOrPiecesOnOtherSideStrategy,
+    EvenGoalStealAndPiecesOnOtherSideStrategy,
     ExampleRandomPlayerStrategy,
 )
 
@@ -72,6 +73,18 @@ def max_vs_even_goal(starting_player: Optional[Player] = None):
     print()
 
 
+def even_goal_vs_even_stealing_shedding(starting_player: Optional[Player] = None):
+    loop = SimulationLoop(
+        player_one=EvenGoalOrPiecesOnOtherSideStrategy(),
+        player_two=EvenGoalStealAndPiecesOnOtherSideStrategy(),
+        starting_player=starting_player,
+    )
+    print(f"Starting player: {loop.starting_player}")
+    loop.run()
+    pprint(json.loads(loop.serialize()))
+    print()
+
+
 if __name__ == "__main__":
-    min_vs_even_goal(Player.ONE)
-    min_vs_even_goal(Player.TWO)
+    even_goal_vs_even_stealing_shedding(Player.ONE)
+    even_goal_vs_even_stealing_shedding(Player.TWO)

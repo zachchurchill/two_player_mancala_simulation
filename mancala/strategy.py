@@ -1,5 +1,6 @@
 import random
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from mancala.mancala import PlayerRow
 
@@ -11,7 +12,9 @@ class PlayerStrategy(metaclass=ABCMeta):
         """Provide a unique name for the strategy."""
 
     @abstractmethod
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         """Provides the player's bin selection for the Turn."""
 
 
@@ -20,7 +23,9 @@ class ExampleRandomPlayerStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "random-selection"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         nonempty_bins_with_index = [
             (i, b_i) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
@@ -35,7 +40,9 @@ class AlwaysMinimumPlayerStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "always-minimum"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         nonempty_bins_with_index = [
             (i, b_i) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
@@ -51,7 +58,9 @@ class AlwaysMaximumPlayerStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "always-maximum"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         nonempty_bins_with_index = [
             (i, b_i) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
@@ -84,7 +93,9 @@ class EvenGoalOrPiecesOnOtherSideStrategy(PlayerStrategy):
     def strategy_name(self) -> str:
         return "even-goal-or-more-pieces-to-opponent"
 
-    def choose_bin(self, player_row: PlayerRow) -> int:
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
         if all(b_i == 0 for b_i in player_row.bins):
             raise ValueError("player_row does not contain any non-empty-bins")
 
@@ -94,6 +105,65 @@ class EvenGoalOrPiecesOnOtherSideStrategy(PlayerStrategy):
         if len(goal_making_bins) > 0:
             return goal_making_bins[0]
 
+        number_of_pieces_in_opponents_row = [
+            (i, b_i - i - 1) for i, b_i in enumerate(player_row.bins) if b_i > 0
+        ]
+        return max(number_of_pieces_in_opponents_row, key=lambda item: item[1])[0]
+
+
+class EvenGoalStealAndPiecesOnOtherSideStrategy(PlayerStrategy):
+    """Strategy focused on goal making, steal pieces, and shedding pieces.
+
+    Similar to `EvenGoalOrPiecesOnOtherSideStrategy`, this strategy will
+    first try to make a goal. But before trying to put the most pieces on
+    the opponent's row, this strategy will check if there are any moves that
+    would result in steal pieces from the opponent. Additionally, if there
+    are several such moves, then the move that maximizes the pieces stolen
+    will be selected. Finally, if neither of the previous move types are an
+    option, then a bin will be selected which maximizes the number of pieces
+    moved toward/to the opponent's row.
+
+    """
+
+    @property
+    def strategy_name(self) -> str:
+        return "even-goal-then-stealing-finally-shedding"
+
+    def choose_bin(
+        self, player_row: PlayerRow, opponent_row: Optional[PlayerRow] = None
+    ) -> int:
+        if all(b_i == 0 for b_i in player_row.bins):
+            raise ValueError("player_row does not contain any non-empty-bins")
+        elif not isinstance(opponent_row, PlayerRow):
+            raise ValueError("strategy requires opponent_row be provided")
+
+        # goal making
+        goal_making_bins = [
+            i for i, b_i in enumerate(player_row.bins) if b_i > 0 and b_i == i + 1
+        ]
+        if len(goal_making_bins) > 0:
+            return goal_making_bins[0]
+
+        # stealing
+        potential_stealing_bins = [
+            i
+            for i, (p_b_i, o_b_i) in enumerate(zip(player_row.bins, opponent_row.bins))
+            if p_b_i == 0 and o_b_i > 0
+        ]
+        move_result_bins = [
+            (i, i - b_i)  # if > 0, then this gives resulting bin within player's row
+            for i, b_i in enumerate(player_row.bins)
+            if b_i > 0
+        ]
+        stealing_bin_moves = [
+            (i, opponent_row.bins[ending_i])
+            for i, ending_i in move_result_bins
+            if ending_i in potential_stealing_bins
+        ]
+        if len(stealing_bin_moves) > 0:
+            return max(stealing_bin_moves, key=lambda item: item[1])[0]
+
+        # shedding
         number_of_pieces_in_opponents_row = [
             (i, b_i - i - 1) for i, b_i in enumerate(player_row.bins) if b_i > 0
         ]
