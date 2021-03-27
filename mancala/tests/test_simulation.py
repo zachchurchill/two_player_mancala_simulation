@@ -12,14 +12,21 @@ from mancala.strategy import (
 )
 
 
+def test_simulation_loop_provides_player_strategy_properties():
+    player_one = ExampleRandomPlayerStrategy()
+    player_two = ExampleRandomPlayerStrategy()
+    loop = SimulationLoop(player_one=player_one, player_two=player_two)
+    assert loop.player_one_strategy == player_one
+    assert loop.player_two_strategy == player_two
+
+
 def test_simulation_loops_provides_player_strategies_in_dict_format():
     player_one = ExampleRandomPlayerStrategy()
     player_two = ExampleRandomPlayerStrategy()
     loop = SimulationLoop(player_one=player_one, player_two=player_two)
-    assert Player.ONE in loop.player_one
-    assert loop.player_one[Player.ONE] == player_one
-    assert Player.TWO in loop.player_two
-    assert loop.player_two[Player.TWO] == player_two
+    assert {Player.ONE, Player.TWO} == loop.player_strategies.keys()
+    assert player_one == loop.player_strategies[Player.ONE]
+    assert player_two == loop.player_strategies[Player.TWO]
 
 
 @pytest.mark.parametrize("player", Player)

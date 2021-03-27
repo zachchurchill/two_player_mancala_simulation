@@ -39,12 +39,16 @@ class SimulationLoop:
         self._boards: List[Board] = [get_new_board()]
 
     @property
-    def player_one(self) -> Dict[Player, PlayerStrategy]:
-        return {Player.ONE: self._strategies[Player.ONE]}
+    def player_one_strategy(self) -> PlayerStrategy:
+        return self._strategies[Player.ONE]
 
     @property
-    def player_two(self) -> Dict[Player, PlayerStrategy]:
-        return {Player.TWO: self._strategies[Player.TWO]}
+    def player_two_strategy(self) -> PlayerStrategy:
+        return self._strategies[Player.TWO]
+
+    @property
+    def player_strategies(self) -> Dict[Player, PlayerStrategy]:
+        return self._strategies
 
     @property
     def starting_player(self) -> Dict[Player, PlayerStrategy]:
