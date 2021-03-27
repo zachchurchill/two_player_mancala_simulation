@@ -51,8 +51,8 @@ class SimulationLoop:
         return self._strategies
 
     @property
-    def starting_player(self) -> Dict[Player, PlayerStrategy]:
-        return {self._starting_player: self._strategies[self._starting_player]}
+    def starting_player(self) -> Player:
+        return self._starting_player
 
     @property
     def turns(self) -> List[Turn]:
@@ -67,10 +67,8 @@ class SimulationLoop:
         return self._has_run
 
     @property
-    def winning_player(self) -> Optional[Dict[Player, PlayerStrategy]]:
-        if self.has_run and self._winning_player is not None:
-            return {self._winning_player: self._strategies[self._winning_player]}
-        return None
+    def winning_player(self) -> Optional[Player]:
+        return self._winning_player
 
     def _is_end_of_game(self) -> bool:
         """In reality, the first player to get >24 pieces is the winner."""
