@@ -12,14 +12,21 @@ from mancala.strategy import (
 )
 
 
+def test_simulation_loop_provides_player_strategy_properties():
+    player_one = ExampleRandomPlayerStrategy()
+    player_two = ExampleRandomPlayerStrategy()
+    loop = SimulationLoop(player_one=player_one, player_two=player_two)
+    assert loop.player_one_strategy == player_one
+    assert loop.player_two_strategy == player_two
+
+
 def test_simulation_loops_provides_player_strategies_in_dict_format():
     player_one = ExampleRandomPlayerStrategy()
     player_two = ExampleRandomPlayerStrategy()
     loop = SimulationLoop(player_one=player_one, player_two=player_two)
-    assert Player.ONE in loop.player_one
-    assert loop.player_one[Player.ONE] == player_one
-    assert Player.TWO in loop.player_two
-    assert loop.player_two[Player.TWO] == player_two
+    assert {Player.ONE, Player.TWO} == loop.player_strategies.keys()
+    assert player_one == loop.player_strategies[Player.ONE]
+    assert player_two == loop.player_strategies[Player.TWO]
 
 
 @pytest.mark.parametrize("player", Player)
@@ -29,7 +36,7 @@ def test_simulation_loop_provides_option_to_choose_starting_player(player):
         player_two=ExampleRandomPlayerStrategy(),
         starting_player=player,
     )
-    assert loop.starting_player.keys() == {player}
+    assert loop.starting_player == player
 
 
 def test_simulation_loop_sets_up_starting_player_if_not_provided():
@@ -38,7 +45,7 @@ def test_simulation_loop_sets_up_starting_player_if_not_provided():
         player_two=ExampleRandomPlayerStrategy(),
     )
     assert loop.starting_player is not None
-    assert loop.starting_player.keys() < {Player.ONE, Player.TWO}
+    assert loop.starting_player in {Player.ONE, Player.TWO}
 
 
 def test_simulation_loop_starts_off_with_no_run_and_winning_player():
@@ -86,12 +93,8 @@ def test_simulation_loop_stops_when_goal_is_over_24(p1, p2, expected_winner):
     assert len(loop.boards) > 1
 
     assert loop.winning_player is not None
-    winning_player_enum, *_ = loop.winning_player.keys()
-    winning_player_strategy, *_ = loop.winning_player.values()
-    assert winning_player_enum == expected_winner
-    assert isinstance(winning_player_strategy, AlwaysMinimumPlayerStrategy)
-
-    assert loop.boards[-1][winning_player_enum].goal >= 24
+    assert loop.winning_player == expected_winner
+    assert loop.boards[-1][loop.winning_player].goal >= 24
 
 
 def test_simulation_loop_stops_if_there_is_a_tie():
