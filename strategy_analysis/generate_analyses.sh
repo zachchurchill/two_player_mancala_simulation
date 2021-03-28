@@ -7,11 +7,15 @@ readonly STRATEGIES=(
   "EvenGoalStealAndPiecesOnOtherSideStrategy"
   "ExampleRandomPlayerStrategy"
 )
+strategies_length=${#STRATEGIES[@]}
 
-for player_one_strategy in "${STRATEGIES[@]}"
+for (( i=0; i<$strategies_length; i++ ))
 do
-  for player_two_strategy in "${STRATEGIES[@]}"
+  player_one_strategy="${STRATEGIES[$i]}"
+  for (( j=$i; j<$strategies_length; j++ ))
   do
+    player_two_strategy="${STRATEGIES[$j]}"
+
     export MANCALA_PLAYER_ONE="$player_one_strategy"
     export MANCALA_PLAYER_TWO="$player_two_strategy"
     output_file="${player_one_strategy}_vs_${player_two_strategy}.html"
